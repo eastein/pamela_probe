@@ -10,4 +10,4 @@ The purpose of pamela_probe is to be a long running process that is capable of m
 
 Incomplete. Just a wrapper around arp-scan for now.
 
-    sudo python -c "import probe; s=probe.Scanner('wlan0'); import pprint; pprint.pprint(list(s.scan()))"
+    sudo python -c "import probe; s=probe.ARPScanner('wlan0'); import pprint; pprint.pprint(list(s.scan()))"

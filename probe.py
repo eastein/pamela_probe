@@ -14,7 +14,7 @@ class ARPScanner(Scanner) :
 		super(ARPScanner, self).__init__()
 
 	def scan(self) :
-		cmd = ['arp-scan', '-R', '--interface', self.interface, '--localnet']
+		cmd = ['arp-scan', '-g', '-R', '--interface', self.interface, '--localnet']
 		p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		o, trash = p.communicate()
 		for l in o.split('\n') :

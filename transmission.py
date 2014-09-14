@@ -32,6 +32,7 @@ class NetworkStatus(object) :
 		# loop state
 		self.seq = 0
 		self.ok = True
+		self.transmitted_snapshot = False
 
 	# derived setting
 	@property
@@ -72,37 +73,45 @@ class NetworkStatus(object) :
 		def create_message_part(msg_type, nodes=None) :
 			obj = {
 				'type' : msg_type,
-				'serial' : self.serial
 			}
 			if nodes is not None :
 				nl = list(nodes)
 				nl.sort()
 				obj['nodes'] = nl
-			if self.previous_serial is not None :
-				obj['prev_serial'] = self.previous_serial
 			return obj
 
 		def send_message(message_parts_list) :
+			message_object = {
+				'serial' : self.serial,
+				'parts' : message_parts_list
+			}
+			if self.previous_serial is not None :
+				message_object['prev_serial'] = self.previous_serial
+			
 			if verbose :
-				pprint.pprint(message_parts_list)
+				pprint.pprint(message_object)
 			if self.jzp :
-				self.jzp.send(message_parts_list)
+				self.jzp.send(message_object)
 
 		self.previous_serial = self.serial
 		self.serial = self.genserial()
 
 		message_parts = list()
 
-		if (self.previous_serial is not None) and removed :
-			message_parts.append(create_message_part('remove', removed))
+		if removed :
+			# until a snapshot has been transmitted, removes are not usable; there is nothing to remove from
+			if self.transmitted_snapshot :
+				message_parts.append(create_message_part('remove', removed))
 			self.net = present
-		if (self.previous_serial is not None) and added :
-			message_parts.append(create_message_part('add', added))
+		if added :
+			# until a snapshot has been transmitted, add is not usable, and we also don't know that its presence is fresh
+			if self.transmitted_snapshot :
+				message_parts.append(create_message_part('add', added))
 			self.net = self.net.union(added)
 
 		if seq_mode :
 			message_parts.append(create_message_part('snapshot', self.net))
-
+			self.transmitted_snapshot = True
 
 		if not message_parts :
 			message_parts.append(create_message_part('no-op'))

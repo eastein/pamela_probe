@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+
+import sys, optparse
+import transmission, probe
+from zmqfan import zmqsub
+
+if __name__ == '__main__' :
+	parser = optparse.OptionParser()
+	parser.add_option('-i', '--interface', dest='interface', help="The interface to operate on.")
+	parser.add_option('-b', '--bind', dest='bind_zmq_url', default=None, help="ZMQ url to bind to.")
+	parser.add_option('-c', '--connect', dest='connect_zmq_url', default=None, help="ZMQ url to connect to.")
+	parser.add_option('-v', '--verbose', dest='verbose', action='store_true', default=False, help="To print messages as well as send them on the wire.")
+	
+	(opts, args) = parser.parse_args()
+
+	if opts.bind_zmq_url and opts.connect_zmq_url :
+		raise RuntimeError("you cannot specify both bind and connect.")
+
+	if not opts.interface :
+		raise RuntimeError("interface is required")
+
+	s = probe.ARPScanner(opts.interface)
+
+	if opts.connect_zmq_url :
+		zso = zmqsub.ConnectPub(opts.connect_zmq_url)
+	elif opts.bind_zmq_url :
+		zso = zmqsub.BindPub(opts.bind_zmq_url)
+
+	t = transmission.NetworkStatus(s, zso)
+	t.loop(verbose=opts.verbose)

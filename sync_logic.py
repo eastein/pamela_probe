@@ -94,7 +94,7 @@ class NetworkView(object) :
 				self.serial = m_ser
 				self.synced = True
 				self.net = set(last_part['nodes'])
-				self.pass_event(Snapshot(self.serial, self.net))
+				self.pass_event(Snapshot(self.serial, set(self.net)))
 				self.pass_event(Sync(self.serial, None))
 			else :
 				# we were synced once, but aren't right now. whoops!

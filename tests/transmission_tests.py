@@ -40,6 +40,8 @@ class TestSubscription(unittest.TestCase) :
 		})
 		snap_e = ts.events[0]
 		self.assertTrue(snap_e.istype(sl.Snapshot))
+		self.assertEquals(snap_e.serial, 1)
+		self.assertEquals(snap_e.nodes, set(['a']))
 		sync_e = ts.events[1]
 		self.assertTrue(sync_e.istype(sl.Sync))
 		self.assertEquals(len(ts.events), 2)

@@ -1,1 +1,2 @@
+nose
 git+https://github.com/eastein/zmqfan.git@develop-0.6#egg=zmqfan

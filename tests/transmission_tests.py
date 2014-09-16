@@ -44,4 +44,6 @@ class TestSubscription(unittest.TestCase) :
 		self.assertEquals(snap_e.nodes, set(['a']))
 		sync_e = ts.events[1]
 		self.assertTrue(sync_e.istype(sl.Sync))
+		self.assertEquals(sync_e.serial, 1)
+		self.assertEquals(sync_e.nodes, None)
 		self.assertEquals(len(ts.events), 2)

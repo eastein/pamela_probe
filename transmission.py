@@ -125,3 +125,22 @@ class NetworkStatus(object) :
 			rem = self.target_latency - max(0, time.time() - ts)
 			if rem > 0.0 :
 				time.sleep(rem)
+
+
+class ConsumerThread(threading.Thread) :
+	def __init__(self, s, nv) :
+		self.s = s
+		self.nv = nv
+		self.ok = True
+		threading.Thread.__init__(self)
+
+	def run(self) :
+		while self.ok :
+			try :
+				msg = self.s.recv(timeout=1.0)
+				self.nv.handle_message(msg)
+			except zmqsub.NoMessagesException :
+				pass
+
+	def stop(self) :
+		self.ok = False

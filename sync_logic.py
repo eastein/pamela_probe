@@ -1,4 +1,3 @@
-from zmqfan import zmqsub
 import threading
 
 class Flags(object) :
@@ -40,24 +39,6 @@ class Add(Event) :
 class Remove(Event) :
 	pass
 
-class ConsumerThread(threading.Thread) :
-	def __init__(self, s, nv) :
-		self.s = s
-		self.nv = nv
-		self.ok = True
-		threading.Thread.__init__(self)
-
-	def run(self) :
-		while self.ok :
-			try :
-				msg = self.s.recv(timeout=1.0)
-				self.nv.handle_message(msg)
-			except zmqsub.NoMessagesException :
-				pass
-
-	def stop(self) :
-		self.ok = False
-
 class NetworkView(object) :
 	"""
 	Accepts incoming messages transmitted by transmitter.py
@@ -89,7 +70,8 @@ class NetworkView(object) :
 		for s in self.subscribers :
 			s.recv_event(e)
 
-	def process_nodes(self, nll) :
+	def process_nodes(self, p) :
+		nll = p.get('nodes')
 		if nll is None :
 			return nll
 		return set([tuple(n) for n in nll])
@@ -105,7 +87,7 @@ class NetworkView(object) :
 		m_prev_ser = mobj.get('prev_serial')
 		parts = [{
 			'type': p['type'],
-			'nodes': self.process_nodes(p['nodes'])
+			'nodes': self.process_nodes(p)
 			} for p in mobj['parts']]
 		n_parts = len(parts)
 		last_part = parts[-1]
@@ -148,6 +130,6 @@ class NetworkView(object) :
 					self.net = self.net.difference(nodeset)
 					self.pass_event(Remove(self.serial, nodeset))
 			
-			if self.flags & Flags.ALL_SYNCS : 
+			if (self.flags & Flags.ALL_SYNCS) : 
 				self.pass_event(Sync(self.serial, None))
 

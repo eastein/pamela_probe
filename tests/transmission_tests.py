@@ -47,6 +47,16 @@ REMOVE_MSG = {
 	]
 }
 
+NOP_MSG = {
+	'serial' : 2,
+	'prev_serial' : 1,
+	'parts' : [
+		{
+			'type' : 'no-op',
+		}
+	]
+}
+
 class TestSubscription(unittest.TestCase) :
 	def setup(self) :
 		ts = TestSubscriber()
@@ -91,3 +101,15 @@ class TestSubscription(unittest.TestCase) :
 		self.assertTrue(rem.istype(sl.Remove))
 
 		self.assertEquals(set([('a','a','a'), ('c','c','c')]), nv.net)
+
+
+	def test_nop(self) :
+		ts,nv = self.setup()
+
+		nv.handle_message(INITIAL_SNAP)
+		self.assertEquals(len(ts.events), 2)
+		self.assertEquals(nv.serial, 1)
+		
+		nv.handle_message(NOP_MSG)
+		self.assertEquals(len(ts.events), 2)
+		self.assertEquals(nv.serial, 2)

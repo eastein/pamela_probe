@@ -113,8 +113,14 @@ class NetworkView(object) :
 
 			for part in parts :
 				if part['type'] == 'add' :
-					self.net = self.net.union(set(part['nodes']))
+					nodeset = set(part['nodes'])
+					self.net = self.net.union(nodeset)
+					self.pass_event(Add(self.serial, nodeset))
 				elif part['type'] == 'remove' : 
-					self.net = self.net.difference(set(part(['nodes'])))
-			self.pass_event(Sync(self.serial, None))
+					nodeset = set(part['nodes'])
+					self.net = self.net.difference(nodeset)
+					self.pass_event(Remove(self.serial, nodeset))
+			
+			if self.flags & Flags.ALL_SYNCS : 
+				self.pass_event(Sync(self.serial, None))
 

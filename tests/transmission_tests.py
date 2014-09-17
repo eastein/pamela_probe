@@ -14,7 +14,28 @@ class TestSubscriber(object) :
 
 	def recv_event(self, e) :
 		self.events.append(e)
-	
+
+INITIAL_SNAP = {
+	'serial' : 1,
+	'parts' : [
+		{
+			'type' : 'snapshot',
+			'nodes' : set(['a'])
+		}
+	]
+}	
+
+ADD_MSG = {
+	'serial' : 2,
+	'prev_serial' : 1,
+	'parts' : [
+		{
+			'type' : 'add',
+			'nodes' : set(['b'])
+		}
+	]
+}
+
 class TestSubscription(unittest.TestCase) :
 	def setup(self) :
 		ts = TestSubscriber()
@@ -29,15 +50,7 @@ class TestSubscription(unittest.TestCase) :
 	def test_snap_sync(self) :
 		ts, nv = self.setup()
 
-		nv.handle_message({
-			'serial' : 1,
-			'parts' : [
-				{
-					'type' : 'snapshot',
-					'nodes' : set(['a'])
-				}
-			]
-		})
+		nv.handle_message(INITIAL_SNAP)
 		snap_e = ts.events[0]
 		self.assertTrue(snap_e.istype(sl.Snapshot))
 		self.assertEquals(snap_e.serial, 1)
@@ -47,3 +60,14 @@ class TestSubscription(unittest.TestCase) :
 		self.assertEquals(sync_e.serial, 1)
 		self.assertEquals(sync_e.nodes, None)
 		self.assertEquals(len(ts.events), 2)
+
+	def test_add(self) :
+		ts,nv = self.setup()
+		
+		nv.handle_message(INITIAL_SNAP)
+		self.assertEquals(len(ts.events), 2)
+
+		nv.handle_message(ADD_MSG)
+		self.assertEquals(len(ts.events), 3)
+		addm = ts.events[2]
+		self.assertTrue(addm.istype(sl.Add))

@@ -1,5 +1,3 @@
-import threading
-
 class Flags(object) :
 	"""
 	Flag constants namespace

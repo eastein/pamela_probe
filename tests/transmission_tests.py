@@ -20,7 +20,7 @@ INITIAL_SNAP = {
 	'parts' : [
 		{
 			'type' : 'snapshot',
-			'nodes' : set(['a', 'b'])
+			'nodes' : [['a','a','a'],[ 'b', 'b', 'b']]
 		}
 	]
 }	
@@ -31,7 +31,7 @@ ADD_MSG = {
 	'parts' : [
 		{
 			'type' : 'add',
-			'nodes' : set(['c'])
+			'nodes' : [['c','c','c']]
 		}
 	]
 }
@@ -42,7 +42,7 @@ REMOVE_MSG = {
 	'parts' : [
 		{
 			'type' : 'remove',
-			'nodes' : set(['b'])
+			'nodes' : [['b', 'b', 'b']]
 		}
 	]
 }
@@ -65,7 +65,7 @@ class TestSubscription(unittest.TestCase) :
 		snap_e = ts.events[0]
 		self.assertTrue(snap_e.istype(sl.Snapshot))
 		self.assertEquals(snap_e.serial, 1)
-		self.assertEquals(snap_e.nodes, set(['a', 'b']))
+		self.assertEquals(snap_e.nodes, set([('a','a','a'), ('b','b','b')]))
 		sync_e = ts.events[1]
 		self.assertTrue(sync_e.istype(sl.Sync))
 		self.assertEquals(sync_e.serial, 1)
@@ -82,12 +82,12 @@ class TestSubscription(unittest.TestCase) :
 		self.assertEquals(len(ts.events), 3)
 		addm = ts.events[2]
 		self.assertTrue(addm.istype(sl.Add))
-		self.assertEquals(addm.nodes, set(['c']))
+		self.assertEquals(addm.nodes, set([('c','c','c')]))
 
-		self.assertEquals(set(['a','b','c']), nv.net)
+		self.assertEquals(set([('a','a','a'), ('b','b','b'),('c','c','c')]), nv.net)
 		nv.handle_message(REMOVE_MSG)
 		self.assertEquals(len(ts.events), 4)
 		rem = ts.events[3]
 		self.assertTrue(rem.istype(sl.Remove))
 
-		self.assertEquals(set(['a','c']), nv.net)
+		self.assertEquals(set([('a','a','a'), ('c','c','c')]), nv.net)
